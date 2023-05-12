@@ -1,0 +1,11 @@
+{
+  "name": "ogre",
+  "version": "1.0.0",
+  "description": "Object graph navigation",
+  "main": "ogre.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mike McNally",
+  "license": "ISC"
+}

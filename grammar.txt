@@ -1,0 +1,10 @@
+S -> Extraction [ <.> Extraction ]*
+
+Extraction -> Property | PropertyList | PropertyObject | <*> Extraction
+
+Property -> <name>
+
+PropertyList -> <[> Extraction [ <,> Extraction ]* <]>
+
+PropertyObject -> <{> <name>: Extraction [ <,> <name>: Extraction ]* <}>
+
