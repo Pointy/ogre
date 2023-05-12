@@ -49,8 +49,10 @@ class Chain {
 
 class Extraction {
     #operator;
+    #text;
 
     constructor(lex) {
+        const startpos = lex.pos;
         switch (lex.tok) {
         case T.NAME: {
             const key = lex.val;
@@ -73,23 +75,54 @@ class Extraction {
         case T.LBRACK: {
             const list = [];
             lex.getToken();
-            while (lex.tok != T.RBRACK) {
+            while (lex.tok != T.RBRACK && lex.tok !== T.EOF) {
                 const extraction = new Chain(lex);
                 list.push(extraction);
                 if (lex.tok === T.COMMA)
                     lex.getToken();
             }
+            if (lex.tok !== T.RBRACK)
+                throw new Error(`Incomplete bracketed list`);
             lex.getToken();
             this.#operator = function *(object) {
+                const rv = [];
                 for (let i = 0; i < list.length; ++i) {
-                    yield list[i].extract(object);
+                    rv.push(list[i].extract(object));
                 }
+                yield rv;
+            }
+            break;
+        }
+        case T.LBRACE: {
+            const list = [];
+            lex.getToken();
+            while (lex.tok !== T.RBRACE && lex.tok !== T.EOF) {
+                const prop = { name: lex.val };
+                lex.getToken();
+                if (lex.tok !== T.COLON)
+                    throw new Error(`Expected colon at ${lex.pos}, saw ${lex.tok}`);
+                lex.getToken();
+                prop.extr = new Chain(lex);
+                if (lex.tok === T.COMMA)
+                    lex.getToken();
+                list.push(prop);
+            }
+            if (lex.tok !== T.RBRACE)
+                throw new Error(`Incomplete named property list`);
+            lex.getToken();
+            this.#operator = function *(object) {
+                const rv = {};
+                for (let i = 0; i < list.length; ++i) {
+                    rv[list[i].name] = list[i].extr.extract(object);
+                }
+                yield rv;
             }
             break;
         }
         default:
-            throw new Error(`Expected extraction at source position ${lex.pos}`)
+            throw new Error(`Expected extraction at source position ${lex.pos}, ${lex.tok}`)
         }
+        this.#text = lex.path.slice(startpos, lex.pos);
     }
 
     get op() { return this.#operator; }

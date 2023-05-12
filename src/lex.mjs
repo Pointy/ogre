@@ -1,5 +1,5 @@
 
-const TRX = /(\.)|(\,)|(\[)|(\])|({)|(})|(\*)|((?!")(?:[^.,\[\]{}\\])+)|"((?:[^"]|\\")*)"/y;
+const TRX = /(\.)|(\,)|(\[)|(\])|({)|(})|(\*)|((?!")(?:[^.,\[\]{}\\:])+)|"((?:[^"]|\\")*)"|(:)/y;
 
 const DOT = new String("DOT"),
     COMMA = new String("COMMA"),
@@ -10,6 +10,7 @@ const DOT = new String("DOT"),
     STAR = new String("*"),
     NAME = new String("name"),
     QNAME = new String("qname"),
+    COLON = new String("COLON"),
     EOF = new String("EOF")
 ;
 
@@ -24,10 +25,11 @@ const TOKENS = Object.freeze([
     STAR,
     NAME,
     QNAME,
+    COLON,
     EOF
 ]);
 
-const T = { DOT, COMMA, LBRACK, RBRACK, LBRACE, RBRACE, STAR, NAME, EOF };
+const T = { DOT, COMMA, LBRACK, RBRACK, LBRACE, RBRACE, STAR, NAME, COLON, EOF };
 
 class Lex {
     #path;
@@ -44,9 +46,13 @@ class Lex {
     }
 
     getToken() {
+        while (/\s/.test(this.#path[this.#TRX.lastIndex]))
+            this.#TRX.lastIndex++;
+
         if (this.#TRX.lastIndex >= this.#path.length) {
             this.#curtok = EOF;
             this.#curval = null;
+            this.#pos = this.#path.length;
             return this.tok;
         }
         this.#pos = this.#TRX.lastIndex;
@@ -75,7 +81,7 @@ class Lex {
     get path() {
         return this.#path;
     }
-    
+
     get frag() {
         return this.#path.slice(this.pos);
     }
