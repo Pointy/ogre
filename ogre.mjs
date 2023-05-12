@@ -5,6 +5,9 @@ function ogre(path, target) {
     return parser.extract(target);
 }
 
-export { ogre };
+function print(path) {
+    const parser = parse(path);
+    parser.print();
+}
 
-console.dir(ogre(process.argv[2], JSON.parse(process.argv[3])));
+export { ogre, print };

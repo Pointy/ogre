@@ -1,5 +1,9 @@
 import { Lex, T } from "./lex.mjs";
 
+function spaces(n) {
+    return n && new Array(n + 1).join(" ") || "";
+}
+
 class S {
     #chain = null;
 
@@ -17,35 +21,46 @@ class S {
             return rv[0];
         return rv;
     }
+
+    print() {
+        this.#chain.print();
+    }
 }
 
 class Chain {
-    #head; #tail; #frag;
+    #head; #tail; #text;
 
     constructor(lex) {
-        this.#frag = lex.frag;
+        const startp = lex.pos;
         this.#head = new Extraction(lex);
         if (lex.tok === T.DOT) {
             lex.getToken();
             this.#tail = new Chain(lex);
         }
+        this.#text = lex.path.slice(startp, lex.pos);
     }
 
     get head() { return this.#head; }
     get tail() { return this.#tail; }
 
     extract(target) {
-        const gen = this.head.op(target);
+        const headval = this.head.op(target);
+        return this.tail?.extract(headval) ?? headval;
+    }
 
-        const iter = Array.from(gen);
-        const rv = iter.map(v => {
-            return this.tail?.extract(v) ?? v;
-        });
-        if (rv.length === 1)
-            return rv[0];
-        return rv;
+    get text() { return this.#text; }
+
+    print(indent = 0) {
+        console.log(`${spaces(indent)}head:`);
+        this.head.print(indent + 2);
+        if (this.#tail) {
+            console.log(`${spaces(indent)}tail:`);
+            this.#tail.print(indent + 2);            
+        }
     }
 }
+
+const FROMSTAR = Symbol("built from a * extractor");
 
 class Extraction {
     #operator;
@@ -56,18 +71,22 @@ class Extraction {
         switch (lex.tok) {
         case T.NAME: {
             const key = lex.val;
-            this.#operator = function *(object) {
-                yield object[key];
+            this.#operator = function(object) {
+                if (Array.isArray(object) && object[FROMSTAR])
+                    return object.map(elem => elem[key]);
+                return object[key];
             }
             lex.getToken();
             break;
         }
         case T.STAR: {
-            this.#operator = function *(object) {
+            this.#operator = function(object) {
                 const values = Object.values(object);
                 const result = [];
                 for (let i = 0; i < values.length; ++i)
-                    yield values[i];
+                    result.push(values[i]);
+                result[FROMSTAR] = true;
+                return result;
             }
             lex.getToken();
             break;
@@ -84,12 +103,12 @@ class Extraction {
             if (lex.tok !== T.RBRACK)
                 throw new Error(`Incomplete bracketed list`);
             lex.getToken();
-            this.#operator = function *(object) {
+            this.#operator = function(object) {
                 const rv = [];
                 for (let i = 0; i < list.length; ++i) {
                     rv.push(list[i].extract(object));
                 }
-                yield rv;
+                return rv;
             }
             break;
         }
@@ -110,12 +129,12 @@ class Extraction {
             if (lex.tok !== T.RBRACE)
                 throw new Error(`Incomplete named property list`);
             lex.getToken();
-            this.#operator = function *(object) {
+            this.#operator = function(object) {
                 const rv = {};
                 for (let i = 0; i < list.length; ++i) {
                     rv[list[i].name] = list[i].extr.extract(object);
                 }
-                yield rv;
+                return rv;
             }
             break;
         }
@@ -123,6 +142,12 @@ class Extraction {
             throw new Error(`Expected extraction at source position ${lex.pos}, ${lex.tok}`)
         }
         this.#text = lex.path.slice(startpos, lex.pos);
+    }
+
+    get text() { return this.#text; }
+
+    print(indent = 0) {
+        console.log(`${spaces(indent)}Extraction: ${this.text}`)
     }
 
     get op() { return this.#operator; }
@@ -136,4 +161,8 @@ function parse(path) {
     return sentence;
 }
 
-export { parse };
+function print(path) {
+    parse(path).print();
+}
+
+export { parse, print };
