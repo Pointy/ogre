@@ -10,6 +10,12 @@ function starry(o) {
     return Array.isArray(o) && !!o[FROMSTAR];
 }
 
+function setstar(o) {
+    Object.defineProperty(o, FROMSTAR, {
+        value: true
+    });
+}
+
 class S {
     #chain = null;
 
@@ -89,7 +95,7 @@ class Extraction {
                 const result = [];
                 for (let i = 0; i < values.length; ++i)
                     result.push(values[i]);
-                result[FROMSTAR] = true;
+                setstar(result);
                 return result;
             }
             lex.getToken();

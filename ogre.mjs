@@ -10,4 +10,4 @@ function print(path) {
     parser.print();
 }
 
-export { ogre, print };
+export { ogre, print, parse };
