@@ -7,5 +7,9 @@
     "test": "node test.mjs"
   },
   "author": "Mike McNally",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pointy/ogre.git"
+  }
 }
