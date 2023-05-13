@@ -53,8 +53,10 @@ then applying the path `[a,c].*.x` will produce the resulting array `["hello", "
 
 There is one primary function in Ogre, and it is unsurprisingly called "ogre". It is exported as an object, so the `import` looks like
 
-    import { ogre } from "ogre";
+    import { ogre } from "ogre-gnl";
     
+At present there is no CommonJS support.
+
 The function takes two parameters: a path string and a starting target object. The returned value is a scalar if the path navigates to a simple string, number, boolean, or null, or else an object of some kind. (Note that a path does not have to navigate all the way to a leaf of the graph; it can stop anywhere.)
 
 If a path goes astray, which is to say, it the path navigation instructions don't work, the code will throw an exception. Ogre does not make any attempt to adapt to errant target object structures. The intended use case is JSON return values from APIs of one sort or another. (Future versions may introduce optional chain steps, but that involves some subtleties that I haven't figured out completely.)
@@ -63,4 +65,15 @@ So calling the main entry point looks like
 
     const result = ogre(path, target);
     
+
+You can also import a function that parses the path expression and returns an object with an `extract` method:
+
+    import { ogre, parse } from "ogre-gnl";
+
+    const extractor = parse("hello.world");
+
+    // then whenever you need it
+    const extracted = extractor.extract(targetObject);
+
+It's not terribly expensive to parse the path expressions, but it might be convenient in some applications to have them sitting around ready to use.
 

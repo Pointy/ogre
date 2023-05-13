@@ -11,5 +11,13 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Pointy/ogre.git"
-  }
+  },
+  "homepage": "https://github.com/Pointy/ogre.git#readme",
+  "keywords": [
+    "object graph",
+    "navigation",
+    "property extraction",
+    "shrek",
+    "utility"
+  ]
 }
