@@ -1,6 +1,6 @@
 {
-  "name": "ogre",
-  "version": "1.0.0",
+  "name": "ogre-gnl",
+  "version": "0.1.0",
   "description": "Object graph navigation",
   "main": "ogre.mjs",
   "scripts": {
