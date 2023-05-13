@@ -38,7 +38,19 @@ const TARGETS = {
             { a: 1, b: 2 },
             { a: 3, b: 4 },
             { a: 5, b: 6 }
-        ]
+        ],
+        team: {
+            members: [
+                {
+                    email: "foo@scumco.com",
+                    name: "foo"
+                },
+                {
+                    email: "bar@scumco.com",
+                    name: "bar"
+                }
+            ]
+        }
     }
 };
 
@@ -66,6 +78,12 @@ const PATHS = [
     },
     {
         path: "aobj.*.a"
+    },
+    {
+        path: "team.members.*.[name,email]"
+    },
+    {
+        path: "team.members.*.{name:name,email:email}"
     }
 ];
 

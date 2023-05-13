@@ -4,6 +4,12 @@ function spaces(n) {
     return n && new Array(n + 1).join(" ") || "";
 }
 
+const FROMSTAR = Symbol("built from a * extractor");
+
+function starry(o) {
+    return Array.isArray(o) && !!o[FROMSTAR];
+}
+
 class S {
     #chain = null;
 
@@ -60,8 +66,6 @@ class Chain {
     }
 }
 
-const FROMSTAR = Symbol("built from a * extractor");
-
 class Extraction {
     #operator;
     #text;
@@ -72,7 +76,7 @@ class Extraction {
         case T.NAME: {
             const key = lex.val;
             this.#operator = function(object) {
-                if (Array.isArray(object) && object[FROMSTAR])
+                if (starry(object))
                     return object.map(elem => elem[key]);
                 return object[key];
             }
@@ -104,11 +108,14 @@ class Extraction {
                 throw new Error(`Incomplete bracketed list`);
             lex.getToken();
             this.#operator = function(object) {
-                const rv = [];
-                for (let i = 0; i < list.length; ++i) {
-                    rv.push(list[i].extract(object));
-                }
-                return rv;
+                let rv = [];
+                if (starry(object))
+                    rv = object.map(o => (list.map(l => l.extract(o))));
+                else
+                    for (let i = 0; i < list.length; ++i) {
+                        rv.push(list[i].extract(object));
+                    }
+               return rv;
             }
             break;
         }
@@ -130,10 +137,17 @@ class Extraction {
                 throw new Error(`Incomplete named property list`);
             lex.getToken();
             this.#operator = function(object) {
-                const rv = {};
-                for (let i = 0; i < list.length; ++i) {
-                    rv[list[i].name] = list[i].extr.extract(object);
-                }
+                let rv = {};
+                if (starry(object))
+                    rv = object.map(o => {
+                        const rv = {};
+                        list.forEach(e => rv[e.name] = e.extr.extract(o));
+                        return rv;
+                    })
+                else
+                    for (let i = 0; i < list.length; ++i) {
+                        rv[list[i].name] = list[i].extr.extract(object);
+                    }
                 return rv;
             }
             break;
