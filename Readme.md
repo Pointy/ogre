@@ -33,6 +33,8 @@ The basic job of an extraction is to grab one or more things from a single objec
 
 A chain is simply a list of extractions separated by `.` (dot) characters. A complete chain is better refered to as a "path", though you can call it whatever you want.
 
+As the extraction proceeds down a chain, the result of each extraction is fed to the next step in the chain. That means that `[ ]` and `{ }` results create new objects to be processed down the chain, objects that do not appear in the original data structure (though of course they contain values from the original graph).
+
 ### Array-valued Extractions
 
 When a step in a chain is a `[ ]` extraction (which results in an array of evaluated sub-chain values), an immediately subsequent `*` extraction will also result in an array, but it will do so in such a way that the succeeding step on the chain is applied to each element of the array individually, with the result being a new array. This will require an example.
