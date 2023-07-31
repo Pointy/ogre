@@ -59,7 +59,7 @@ At present there is no CommonJS support.
 
 The function takes two parameters: a path string and a starting target object. The returned value is a scalar if the path navigates to a simple string, number, boolean, or null, or else an object of some kind. (Note that a path does not have to navigate all the way to a leaf of the graph; it can stop anywhere.)
 
-If a path goes astray, which is to say, it the path navigation instructions don't work, the code will throw an exception. Ogre does not make any attempt to adapt to errant target object structures. The intended use case is JSON return values from APIs of one sort or another. (Future versions may introduce optional chain steps, but that involves some subtleties that I haven't figured out completely.)
+If a path goes astray, which is to say, it the path navigation instructions don't work, the code will throw an exception or do something weird. Ogre does not make any attempt to adapt to errant target object structures. The intended use case is JSON return values from APIs of one sort or another. (Future versions may introduce optional chain steps, but that involves some subtleties that I haven't figured out completely.)
 
 So calling the main entry point looks like
 
